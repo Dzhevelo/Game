@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Спортивный Челлендж</title>
+    <style>
+        :root {
+            --primary-color: #ff4757;
+            --secondary-color: #2f3542;
+            --accent-color: #57606f;
+            --bg-color: #f1f2f6;
+            --success-color: #2ed573;
+            --error-color: #ff6b81;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+        }
+
+        .screen {
+            display: none;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--secondary-color);
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 40px;
+        }
+
+        p.subtitle {
+            text-align: center;
+            color: #747d8c;
+            margin-bottom: 30px;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 20px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: 2px solid #dfe4ea;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .error-msg {
+            color: var(--error-color);
+            text-align: center;
+            min-height: 24px;
+            margin-top: 10px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        button.main-btn {
+            width: 100%;
+            padding: 22px;
+            font-size: 18px;
+            background: linear-gradient(45deg, var(--primary-color), #ff6b6b);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-top: 15px;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            transition: transform 0.1s;
+        }
+
+        button.main-btn:active {
+            transform: scale(0.98);
+        }
+
+        button.secondary-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 16px;
+            background: #747d8c;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 10px;
+            transition: transform 0.1s;
+        }
+
+        button.secondary-btn:active {
+            transform: scale(0.98);
+        }
+
+        #progressBarContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: #dfe4ea;
+            z-index: 1000;
+        }
+
+        #progressBarFill {
+            height: 100%;
+            background: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        #timer {
+            position: fixed;
+            top: 12px;
+            right: 15px;
+            background: rgba(46, 53, 66, 0.9);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            z-index: 999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.2);
+            font-variant-numeric: tabular-nums;
+        }
+
+        #questionNumber {
+            color: var(--accent-color);
+            margin-bottom: 10px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        #question {
+            font-size: 20px;
+            line-height: 1.4;
+            margin-top: 70px;
+            margin-bottom: 25px;
+            color: var(--secondary-color);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        #answers {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .answer {
+            padding: 18px 15px;
+            font-size: 17px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: var(--secondary-color);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            text-align: left;
+            transition: all 0.2s;
+            min-height: 60px;
+        }
+
+        .answer:active {
+            transform: translateY(2px);
+        }
+
+        .answer:disabled {
+            cursor: default;
+        }
+
+        .answer.correct {
+            background: var(--success-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(46, 213, 115, 0.3);
+        }
+
+        .answer.wrong {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .stats-box {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 40px;
+            border: 1px solid #e1e1e1;
+        }
+
+        .stats-box h2 {
+            margin: 0;
+            color: var(--secondary-color);
+        }
+
+        .stats-box .score-label {
+            color: #747d8c;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        #finalScore {
+            margin: 5px 0;
+            color: var(--primary-color);
+            font-size: 48px;
+            font-weight: 800;
+        }
+
+        .rank-badge {
+            display: inline-block;
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 15px;
+            text-transform: uppercase;
+            font-size: 14px;
+        }
+
+        .answer-count {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #747d8c;
+        }
+
+        .answer-count span {
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .leaderboard-box {
+            margin-top: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .leaderboard-box h3 {
+            text-align: center;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .leaderboard-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+        }
+
+        .leaderboard-row:last-child {
+            border-bottom: none;
+        }
+
+        .leaderboard-row .rank {
+            font-weight: bold;
+            color: var(--accent-color);
+            min-width: 30px;
+        }
+
+        .leaderboard-row .name {
+            flex: 1;
+            text-align: left;
+            padding-left: 10px;
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+
+        .leaderboard-row .pts {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .leaderboard-row.you {
+            background: #fff3cd;
+            border-radius: 8px;
+            padding: 10px 8px;
+        }
+
+        .empty-board {
+            color: #747d8c;
+            text-align: center;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ЭКРАН 1: Вход -->
+    <div id="codeScreen" class="screen active">
+        <div class="container">
+            <h1>Спортивный Челлендж</h1>
+            <p class="subtitle">Проверь, насколько хорошо ты знаешь спорт! 30 вопросов, 15 секунд на каждый.</p>
+            <input type="text" id="eventCode" placeholder="Код доступа" autocomplete="off">
+            <div class="error-msg" id="codeError"></div>
+            <button class="main-btn" onclick="checkCode()">Войти</button>
+            <button class="secondary-btn" onclick="simulateQR()">Demo (без кода)</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 2: Ник -->
+    <div id="eventScreen" class="screen">
+        <div class="container">
+            <h1>Готов к старту?</h1>
+            <p class="subtitle">Выбери никнейм для участия в таблице лидеров.</p>
+            <input type="text" id="nickname" placeholder="Твой никнейм" autocomplete="off">
+            <div class="error-msg" id="nameError"></div>
+            <button class="main-btn" onclick="startGame()">Начать игру</button>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 3: Игра -->
+    <div id="gameScreen" class="screen">
+        <div id="progressBarContainer">
+            <div id="progressBarFill"></div>
+        </div>
+        <div id="timer">00:15</div>
+        <div class="container">
+            <div id="questionNumber"></div>
+            <div id="question"></div>
+            <div id="answers"></div>
+        </div>
+    </div>
+
+    <!-- ЭКРАН 4: Результаты -->
+    <div id="resultScreen" class="screen">
+        <div class="container">
+            <h1>Финиш!</h1>
+            <div class="stats-box">
+                <h2 id="resultName"></h2>
+                <p class="score-label">Твой счёт:</p>
+                <div id="finalScore"></div>
+                <div class="rank-badge" id="finalRank"></div>
+                <div class="answer-count" id="answerCount"></div>
+            </div>
+
+            <!-- Таблица лидеров -->
+            <div class="leaderboard-box">
+                <h3>🏆 Топ игроков</h3>
+                <div id="leaderboardContainer"></div>
+            </div>
+
+            <br>
+            <button class="main-btn" onclick="restartGame()">Сыграть снова</button>
+        </div>
+    </div>
+
+    <script>
+        const EVENT_CODE = "SPORT2024";
+
+        const questions = [
+            { q: "Какой вид спорта называют «королевой спорта»?", answers: ["Плавание", "Лёгкая атлетика", "Футбол", "Хоккей"], correct: 1 },
+            { q: "Сколько игроков одной команды находится на поле в футбольном матче?", answers: ["10", "11", "12", "9"], correct: 1 },
+            { q: "Что означает термин «фол» в спортивных играх?", answers: ["Гол в свои ворота", "Нарушение правил", "Замена игрока", "Тайм-аут"], correct: 1 },
+            { q: "В каком виде спорта используется термин «эйс»?", answers: ["Теннис", "Баскетбол", "Волейбол", "Теннис и волейбол"], correct: 3 },
+            { q: "Какова стандартная длина марафонской дистанции?", answers: ["40 км", "42,195 км", "35 км", "50 км"], correct: 1 },
+            { q: "Сколько периодов в хоккейном матче (без учёта овертайма)?", answers: ["2", "3", "4", "Зависит от лиги"], correct: 1 },
+            { q: "Какой спорт называют «шахматами на льду»?", answers: ["Фигурное катание", "Хоккей", "Кёрлинг", "Конькобежный спорт"], correct: 2 },
+            { q: "Сколько очков даёт штрафной бросок в баскетболе?", answers: ["1", "2", "3", "Зависит от ситуации"], correct: 0 },
+            { q: "Какой плавательный стиль считается самым быстрым?", answers: ["Брасс", "Кроль", "Баттерфляй", "На спине"], correct: 1 },
+            { q: "Сколько колец на олимпийском флаге?", answers: ["4", "5", "6", "7"], correct: 1 },
+            { q: "Как называется удар ногой в голову в кикбоксинге?", answers: ["Хук", "Апперкот", "Раундхаус", "Джеб"], correct: 2 },
+            { q: "Кто считается «королём футбола» по версии многих экспертов?", answers: ["Криштиану Роналду", "Лионель Месси", "Пеле", "Диего Марадона"], correct: 2 },
+            { q: "Из какого материала традиционно делают ядро для толкания?", answers: ["Резина", "Чугун", "Свинец", "Сталь"], correct: 3 },
+            { q: "Какая страна чаще всего побеждала на чемпионатах мира по футболу?", answers: ["Бразилия", "Германия", "Италия", "Аргентина"], correct: 0 },
+            { q: "Что такое «офсайд» в футболе?", answers: ["Удар от ворот", "Положение «вне игры»", "Угловой удар", "Пенальти"], correct: 1 },
+            { q: "Какой снаряд используют в толкании в лёгкой атлетике?", answers: ["Диск", "Копьё", "Ядро", "Молот"], correct: 2 },
+            { q: "Сколько сетов нужно выиграть женщине в большом теннисе для победы в матче?", answers: ["2 из 3", "3 из 5", "1 из 2", "4 из 5"], correct: 0 },
+            { q: "Как называется защитная стойка в боксе, когда боксёр прикрывает лицо перчатками?", answers: ["Клинч", "Гард", "Пик-а-бу", "Блок"], correct: 2 },
+            { q: "Какой цвет карточки означает удаление футболиста с поля?", answers: ["Жёлтая", "Красная", "Зелёная", "Синяя"], correct: 1 },
+            { q: "В каком виде спорта спортсмены соревнуются в прыжках с трамплина?", answers: ["Горнолыжный спорт", "Прыжки на лыжах", "Сноуборд", "Все варианты верны"], correct: 1 },
+            { q: "Как называется бег на короткие дистанции?", answers: ["Спринт", "Марафон", "Кросс", "Стипль-чез"], correct: 0 },
+            { q: "Что используют судьи в регби для обозначения нарушения?", answers: ["Свисток", "Флажок", "Карточку", "Всё перечисленное"], correct: 3 },
+            { q: "Какой элемент обязателен в короткой программе фигурного катания?", answers: ["Тройной аксель", "Каскад", "Спираль", "Вращение"], correct: 3 },
+            { q: "Как называется техника плавания, где руки совершают широкие гребки, а ноги двигаются как ножницы?", answers: ["Баттерфляй", "Брасс", "Кроль", "На боку"], correct: 2 },
+            { q: "Какое спортивное событие проходит каждые 4 года и собирает атлетов со всего мира?", answers: ["Чемпионат мира", "Олимпийские игры", "Кубок мира", "Универсиада"], correct: 1 },
+            { q: "Какой инвентарь используют в бадминтоне?", answers: ["Ракетка и мяч", "Ракетка и волан", "Клюшка и шайба", "Сетка и мяч"], correct: 1 },
+            { q: "Что измеряют секундомером в спорте?", answers: ["Расстояние", "Время", "Скорость", "Вес"], correct: 1 },
+            { q: "Как называется позиция вратаря в хоккее, когда он стоит на коленях и закрывает ворота?", answers: ["Бабочка", "Стена", "Щит", "Барьер"], correct: 0 },
+            { q: "Какой термин используют в шахматах, но иногда применяют и к спортивным тактикам?", answers: ["Мат", "Гамбит", "Рокировка", "Дебют"], correct: 1 },
+            { q: "Как называется финишный рывок бегуна на дистанции?", answers: ["Стартовый разгон", "Спурт", "Темп", "Пейс"], correct: 1 }
+        ];
+
+        let nickname = "";
+        let currentQuestion = 0;
+        let score = 0;
+        let correctAnswers = 0;
+        let timerInterval;
+        let timeLeft = 15;
+
+        // --- Работа с таблицей лидеров ---
+        function getLeaderboard() {
+            var stored = localStorage.getItem('sportChallengeLeaderboard');
+            return stored ? JSON.parse(stored) : [];
+        }
+
+        function saveToLeaderboard(name, score) {
+            var board = getLeaderboard();
+            board.push({ name: name, score: score });
+            board.sort(function(a, b) { return b.score - a.score; });
+            localStorage.setItem('sportChallengeLeaderboard', JSON.stringify(board.slice(0, 10)));
+        }
+
+        function renderLeaderboard(highlightName) {
+            var board = getLeaderboard();
+            var container = document.getElementById('leaderboardContainer');
+
+            if (!board || board.length === 0) {
+                container.innerHTML = '<p class="empty-board">Пока никто не играл. Будь первым!</p>';
+                return;
+            }
+
+            container.innerHTML = board.map(function(item, index) {
+                var isYou = highlightName && item.name === highlightName && item.score === score;
+                var rowClass = isYou ? 'leaderboard-row you' : 'leaderboard-row';
+                var medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : (index + 1) + '.';
+                return '<div class="' + rowClass + '">' +
+                    '<span class="rank">' + medal + '</span>' +
+                    '<span class="name">' + item.name + '</span>' +
+                    '<span class="pts">' + item.score + ' pts</span>' +
+                '</div>';
+            }).join('');
+        }
+
+        function clearLeaderboard() {
+            localStorage.removeItem('sportChallengeLeaderboard');
+        }
+
+        // --- Логика экранов ---
+        function showScreen(screenId) {
+            document.querySelectorAll(".screen").forEach(function(s) {
+                s.classList.remove("active");
+            });
+            document.getElementById(screenId).classList.add("active");
+            window.scrollTo(0, 0);
+        }
+
+        function checkCode() {
+            var input = document.getElementById("eventCode");
+            var error = document.getElementById("codeError");
+            if (input.value.trim().toUpperCase() === EVENT_CODE) {
+                error.textContent = "";
+                showScreen("eventScreen");
+                document.getElementById("nickname").focus();
+            } else {
+                error.textContent = "Неверный код. Проверь или нажми Demo.";
+                input.focus();
+            }
+        }
+
+        function simulateQR() {
+            document.getElementById("eventCode").value = EVENT_CODE;
+            showScreen("eventScreen");
+            document.getElementById("nickname").focus();
+        }
+
+        function startGame() {
+            var input = document.getElementById("nickname");
+            var nameError = document.getElementById("nameError");
+            nickname = input.value.trim();
+
+            if (nickname.length < 2) {
+                nameError.textContent = "Ник должен быть минимум из 2 символов.";
+                input.focus();
+                return;
+            }
+            nameError.textContent = "";
+
+            currentQuestion = 0;
+            score = 0;
+            correctAnswers = 0;
+            showScreen("gameScreen");
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            var question = questions[currentQuestion];
+
+            document.getElementById("questionNumber").textContent = "Вопрос " + (currentQuestion + 1) + " из " + questions.length;
+            document.getElementById("question").textContent = question.q;
+
+            var progress = (currentQuestion / questions.length) * 100;
+            document.getElementById("progressBarFill").style.width = progress + "%";
+
+            var answersContainer = document.getElementById("answers");
+            answersContainer.innerHTML = "";
+
+            question.answers.forEach(function(answer, index) {
+                var button = document.createElement("button");
+                button.className = "answer";
+                button.textContent = answer;
+                button.onclick = function() {
+                    selectAnswer(index, button);
+                };
+                answersContainer.appendChild(button);
+            });
+
+            startTimer();
+        }
+
+        function startTimer() {
+            timeLeft = 15;
+            var timerEl = document.getElementById("timer");
+            timerEl.textContent = "00:" + String(timeLeft).padStart(2, "0");
+
+            timerInterval = setInterval(function() {
+                timeLeft--;
+                timerEl.textContent = "00:" + String(timeLeft).padStart(2, "0");
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    selectAnswer(-1, null);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(index, selectedButton) {
+            clearInterval(timerInterval);
+            var question = questions[currentQuestion];
+            var buttons = document.querySelectorAll(".answer");
+            buttons.forEach(function(btn) { btn.disabled = true; });
+
+            if (index === question.correct) {
+                if (selectedButton) selectedButton.classList.add("correct");
+                score += 100;
+                correctAnswers++;
+                if (timeLeft >= 10) score += 25;
+            } else {
+                if (selectedButton) selectedButton.classList.add("wrong");
+                if (question.correct >= 0 && buttons[question.correct]) {
+                    buttons[question.correct].classList.add("correct");
+                }
+            }
+
+            setTimeout(function() {
+                currentQuestion++;
+                if (currentQuestion >= questions.length) {
+                    finishGame();
+                } else {
+                    loadQuestion();
+                }
+            }, 800);
+        }
+
+        function finishGame() {
+            document.getElementById("progressBarFill").style.width = "100%";
+            document.getElementById("resultName").textContent = nickname;
+            document.getElementById("finalScore").textContent = score.toLocaleString("ru-RU");
+            document.getElementById("answerCount").innerHTML =
+                "Правильных: <span>" + correctAnswers + "</span> из <span>" + questions.length + "</span>";
+
+            var rank = calculateRank();
+            document.getElementById("finalRank").textContent = rank;
+
+            saveToLeaderboard(nickname, score);
+            renderLeaderboard(nickname);
+
+            showScreen("resultScreen");
+        }
+
+        function calculateRank() {
+            var maxScore = questions.length * 125;
+            var percent = (score / maxScore) * 100;
+            if (percent >= 90) return "🏆 Легенда спорта";
+            if (percent >= 75) return "⭐ Суперзвезда";
+            if (percent >= 50) return "🔥 Профи-игрок";
+            if (percent >= 25) return "💪 Опытный болельщик";
+            return "🎓 Новичок";
+        }
+
+        function restartGame() {
+            currentQuestion = 0;
+            score = 0;
+            correctAnswers = 0;
+            document.getElementById("nickname").value = "";
+            showScreen("eventScreen");
+            document.getElementById("nickname").focus();
+        }
+
+        // Enter для отправки форм
+        document.getElementById("eventCode").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") checkCode();
+        });
+        document.getElementById("nickname").addEventListener("keydown", function(e) {
+            if (e.key === "Enter") startGame();
+        });
+    </script>
+</body>
+</html>
